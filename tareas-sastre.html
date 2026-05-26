@@ -235,11 +235,27 @@ async function load() {
   render();
 }
 
+function cleanTask(task) {
+  const t = {...task};
+  Object.keys(t).forEach(k => { if(t[k]===undefined||t[k]===null) delete t[k]; });
+  if(t.states) {
+    const cleanStates = {};
+    Object.keys(t.states).forEach(d => {
+      const s = {...t.states[d]};
+      Object.keys(s).forEach(k => { if(s[k]===undefined||s[k]===null) delete s[k]; });
+      cleanStates[d] = s;
+    });
+    t.states = cleanStates;
+  }
+  return t;
+}
+
 async function save() {
   clearTimeout(saveTimeout);
   saveTimeout = setTimeout(async () => {
     try {
-      await setDoc(doc(db,'datos','tareas'), { lista: tasks });
+      const cleanTasks = tasks.map(cleanTask);
+      await setDoc(doc(db,'datos','tareas'), { lista: cleanTasks });
     } catch(e) { console.error('Error guardando:', e); }
   }, 800);
 }
@@ -511,7 +527,9 @@ document.getElementById('m-save').addEventListener('click',()=>{
   if(!name)return;
   const dateVal=document.getElementById('m-date').value||todayStr();
   const recurStart=document.getElementById('m-recur-start').value||todayStr();
-  const task={id:generateId(),name,person,recurrent:taskType==='recur',date:taskType==='day'?dateVal:recurStart,recurFrom:taskType==='recur'?recurStart:undefined,recur:taskType==='recur'?recurType:undefined,status:'pending',note:'',comment:'',states:taskType==='recur'?{}:undefined,archived:false};
+  const task={id:generateId(),name,person,recurrent:taskType==='recur',date:taskType==='day'?dateVal:recurStart,recurFrom:taskType==='recur'?recurStart:null,recur:taskType==='recur'?recurType:null,status:'pending',note:'',comment:'',states:taskType==='recur'?{}:null,archived:false};
+  // Remove null fields before saving to Firebase
+  Object.keys(task).forEach(k => { if(task[k]===null) delete task[k]; });
   tasks.push(task);save();render();
   document.getElementById('modal').classList.remove('open');
 });
