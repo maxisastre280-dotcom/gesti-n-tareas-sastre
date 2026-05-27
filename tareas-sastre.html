@@ -347,7 +347,7 @@ function cycleState(taskId,dateStr,e) {
 }
 
 function toggleExpand(key,e) {
-  if(e.target.closest('.del-btn')||e.target.closest('.transfer-btn')||e.target.closest('.state-btn'))return;
+  if(e.target.closest('.del-btn')||e.target.closest('.transfer-btn')||e.target.closest('.transfer-today-btn')||e.target.closest('.state-btn')||e.target.closest('.edit-btn'))return;
   if(expandedTasks.has(key))expandedTasks.delete(key);else expandedTasks.add(key);
   render();
 }
@@ -386,6 +386,8 @@ function renderTask(task,dateStr,isYest,showPerson) {
   const showChevron=status==='process'||status==='done';
   const chevron=showChevron?`<span class="chevron">&#8964;</span>`:'';
   const editBtn=`<button class="edit-btn" data-edit="${task.id}" title="Editar">✎</button>`;
+  // Transfer buttons go outside task-row to avoid click conflicts
+  const transferRow = transferBtn ? `<div style="padding:0 12px 8px 44px;display:flex;gap:6px;">${transferBtn}</div>` : '';
   return`<div class="task-item ${yestClass} ${doneClass} ${expClass}">
     <div class="task-row" data-toggle="${key}">
       <div data-state-btn="${task.id}" data-date="${dateStr}">${renderStateBtn(status)}</div>
@@ -394,8 +396,9 @@ function renderTask(task,dateStr,isYest,showPerson) {
         <div class="task-meta">${personTag}${recurTag}</div>
         ${preview}
       </div>
-      <div class="task-actions">${transferBtn}${editBtn}<button class="del-btn" data-del="${task.id}">×</button>${chevron}</div>
+      <div class="task-actions">${editBtn}<button class="del-btn" data-del="${task.id}">×</button>${chevron}</div>
     </div>
+    ${transferRow}
     ${detail}
   </div>`;
 }
