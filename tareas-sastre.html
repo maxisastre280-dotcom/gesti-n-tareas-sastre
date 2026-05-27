@@ -385,7 +385,13 @@ function renderDateGroupPersonal(dateStr,taskList,isYest,isToday) {
   const pending=taskList.filter(t=>getStateForDate(t,dateStr).status==='pending');
   const inProcess=taskList.filter(t=>getStateForDate(t,dateStr).status==='process');
   const done=taskList.filter(t=>getStateForDate(t,dateStr).status==='done');
-  let html=`<div class="date-group"><div class="date-header"><span class="date-label ${labelClass}">${displayDate(dateStr)}</span>${badge}</div>`;
+  // Show exclamation if yesterday has unfinished tasks
+  const hasUnfinished = isYest && (pending.length > 0 || inProcess.length > 0);
+  const exclamation = hasUnfinished ? `<span style="color:#e6a817;font-size:12px;margin-left:6px;" title="Tareas sin cerrar">⚠</span>` : '';
+  // Collapse future dates by default
+  const collapsed = (!isToday && !isYest) ? 'collapsed' : '';
+  const chevron = (!isToday && !isYest) ? `<span class="date-chevron">&#8964;</span>` : '';
+  let html=`<div class="date-group ${collapsed}" data-dategroup="${dateStr}"><div class="date-header" data-toggle-date="${dateStr}"><span class="date-label ${labelClass}">${displayDate(dateStr)}</span>${badge}${exclamation}${chevron}</div><div class="date-tasks">`;
   if(taskList.length===0){html+=`<div class="empty">Sin tareas.</div>`;}
   else{
     pending.forEach(t=>{html+=renderTask(t,dateStr,isYest,false);});
@@ -398,19 +404,36 @@ function renderDateGroupPersonal(dateStr,taskList,isYest,isToday) {
       done.forEach(t=>{html+=renderTask(t,dateStr,isYest,false);});
     }
   }
-  html+=`</div>`;
+  html+=`</div></div>`;
   return html;
 }
 
 function renderDateGroupGeneral(dateStr,taskList,isYest,isToday) {
   const labelClass=isToday?'today':(isYest?'yesterday-lbl':'');
   const badge=isToday?`<span class="date-badge">HOY</span>`:(isYest?`<span class="date-badge" style="background:var(--yesterday)">AYER</span>`:'');
-  // Collapse by default if not today and not yesterday
   const collapsed = (!isToday && !isYest) ? 'collapsed' : '';
   const chevron = (!isToday && !isYest) ? `<span class="date-chevron">&#8964;</span>` : '';
-  let html=`<div class="date-group ${collapsed}" data-dategroup="${dateStr}"><div class="date-header" data-toggle-date="${dateStr}"><span class="date-label ${labelClass}">${displayDate(dateStr)}</span>${badge}${chevron}</div><div class="date-tasks">`;
-  if(taskList.length===0)html+=`<div class="empty">Sin tareas.</div>`;
-  else taskList.forEach(t=>{html+=renderTask(t,dateStr,isYest,true);});
+  // Exclamation if yesterday has unfinished tasks
+  const hasUnfinished = isYest && taskList.some(t=>getStateForDate(t,dateStr).status!=='done');
+  const exclamation = hasUnfinished ? `<span style="color:#e6a817;font-size:12px;margin-left:6px;" title="Tareas sin cerrar">⚠</span>` : '';
+  // Sort by status: pending → process → done
+  const pending=taskList.filter(t=>getStateForDate(t,dateStr).status==='pending');
+  const inProcess=taskList.filter(t=>getStateForDate(t,dateStr).status==='process');
+  const done=taskList.filter(t=>getStateForDate(t,dateStr).status==='done');
+  let html=`<div class="date-group ${collapsed}" data-dategroup="${dateStr}"><div class="date-header" data-toggle-date="${dateStr}"><span class="date-label ${labelClass}">${displayDate(dateStr)}</span>${badge}${exclamation}${chevron}</div><div class="date-tasks">`;
+  if(taskList.length===0){
+    html+=`<div class="empty">Sin tareas.</div>`;
+  } else {
+    pending.forEach(t=>{html+=renderTask(t,dateStr,isYest,true);});
+    if(inProcess.length>0){
+      if(pending.length>0)html+=`<div class="status-divider"><div class="status-divider-dot" style="background:var(--process)"></div><span class="status-divider-label" style="color:var(--process)">En proceso</span></div>`;
+      inProcess.forEach(t=>{html+=renderTask(t,dateStr,isYest,true);});
+    }
+    if(done.length>0){
+      if(pending.length>0||inProcess.length>0)html+=`<div class="status-divider"><div class="status-divider-dot" style="background:var(--done)"></div><span class="status-divider-label" style="color:var(--done)">Finalizadas</span></div>`;
+      done.forEach(t=>{html+=renderTask(t,dateStr,isYest,true);});
+    }
+  }
   html+=`</div></div>`;
   return html;
 }
