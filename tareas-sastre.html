@@ -64,6 +64,10 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); font
 .transfer-btn:hover { color: var(--brand); border-color: var(--brand); }
 .del-btn { font-size: 16px; color: var(--text3); background: none; border: none; cursor: pointer; line-height: 1; padding: 0 2px; }
 .del-btn:hover { color: #e24b4a; }
+.edit-btn { font-size: 13px; color: var(--text3); background: none; border: none; cursor: pointer; line-height: 1; padding: 0 2px; }
+.edit-btn:hover { color: var(--brand); }
+.transfer-today-btn { font-size: 10px; color: var(--text3); background: var(--bg3); border: 0.5px solid var(--border); border-radius: 4px; padding: 2px 7px; cursor: pointer; white-space: nowrap; }
+.transfer-today-btn:hover { color: var(--done); border-color: var(--done); }
 .chevron { font-size: 11px; color: var(--text3); transition: transform 0.2s; flex-shrink: 0; }
 .task-item.expanded .chevron { transform: rotate(180deg); }
 .task-detail { display: none; padding: 0 12px 10px 44px; }
@@ -196,6 +200,22 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); font
   </div>
 </div>
 
+<div class="modal-backdrop" id="edit-modal">
+  <div class="modal">
+    <div class="modal-title">Editar tarea</div>
+    <label>Nombre</label>
+    <input type="text" id="e-name" placeholder="Nombre de la tarea..." />
+    <label>Responsable</label>
+    <select id="e-person">
+      <option>Máximo</option><option>Johana</option><option>Milagros</option><option>Coca</option><option>Rocío</option>
+    </select>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="e-cancel">Cancelar</button>
+      <button class="btn-add" id="e-save">Guardar</button>
+    </div>
+  </div>
+</div>
+
 <!-- Firebase SDK -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -225,7 +245,7 @@ function parseDate(s) { const [y,m,d]=s.split('-').map(Number); return new Date(
 function displayDate(s) { const d=parseDate(s); return `${DAYS_ES[d.getDay()]} ${d.getDate()} de ${MONTHS_ES[d.getMonth()]}`; }
 function yesterdayStr() { return addDays(todayStr(),-1); }
 
-let tasks=[], currentTab='general', viewOffset=0, transferTaskId=null, recurType='daily', taskType='day';
+let tasks=[], currentTab='general', viewOffset=0, transferTaskId=null, editTaskId=null, recurType='daily', taskType='day';
 let expandedTasks=new Set(), personalSearchDate={}, personalSearchResult={};
 let saveTimeout=null;
 
@@ -352,7 +372,7 @@ function renderTask(task,dateStr,isYest,showPerson) {
   const expClass=isExpanded?'expanded':'';
   const nameClass=status==='done'?'done-text':'';
   const excl=isYest&&status!=='done'?`<span class="task-excl">⚠ </span>`:'';
-  const transferBtn=isYest&&status!=='done'?`<button class="transfer-btn" data-id="${task.id}">Trasladar</button>`:'';
+  const transferBtn=isYest&&status!=='done'?`<button class="transfer-today-btn" data-today="${task.id}" title="Mover a hoy">→ Hoy</button><button class="transfer-btn" data-id="${task.id}">Otra fecha</button>`:'';
   const personTag=showPerson?`<span class="task-person">${task.person}</span>`:'';
   const recurTag=task.recurrent?`<span class="task-recur">↻</span>`:'';
   let preview='';
@@ -365,6 +385,7 @@ function renderTask(task,dateStr,isYest,showPerson) {
   if(status==='done')detail=`<div class="task-detail"><div class="detail-label">Comentario final (opcional)</div><textarea class="task-note-input done-input" rows="2" placeholder="Agregar una nota..." data-id="${task.id}" data-date="${dateStr}" data-field="comment">${comment||''}</textarea></div>`;
   const showChevron=status==='process'||status==='done';
   const chevron=showChevron?`<span class="chevron">&#8964;</span>`:'';
+  const editBtn=`<button class="edit-btn" data-edit="${task.id}" title="Editar">✎</button>`;
   return`<div class="task-item ${yestClass} ${doneClass} ${expClass}">
     <div class="task-row" data-toggle="${key}">
       <div data-state-btn="${task.id}" data-date="${dateStr}">${renderStateBtn(status)}</div>
@@ -373,7 +394,7 @@ function renderTask(task,dateStr,isYest,showPerson) {
         <div class="task-meta">${personTag}${recurTag}</div>
         ${preview}
       </div>
-      <div class="task-actions">${transferBtn}<button class="del-btn" data-del="${task.id}">×</button>${chevron}</div>
+      <div class="task-actions">${transferBtn}${editBtn}<button class="del-btn" data-del="${task.id}">×</button>${chevron}</div>
     </div>
     ${detail}
   </div>`;
@@ -517,6 +538,24 @@ function attachEvents() {
   });
   document.querySelectorAll('[data-state-btn]').forEach(el=>{el.addEventListener('click',e=>cycleState(el.dataset.stateBtn,el.dataset.date,e));});
   document.querySelectorAll('[data-del]').forEach(btn=>{btn.addEventListener('click',e=>deleteTask(btn.dataset.del,e));});
+  document.querySelectorAll('[data-edit]').forEach(btn=>{
+    btn.addEventListener('click',e=>{
+      e.stopPropagation();
+      editTaskId=btn.dataset.edit;
+      const task=tasks.find(t=>t.id===editTaskId);
+      if(!task)return;
+      document.getElementById('e-name').value=task.name;
+      document.getElementById('e-person').value=task.person;
+      document.getElementById('edit-modal').classList.add('open');
+    });
+  });
+  document.querySelectorAll('[data-today]').forEach(btn=>{
+    btn.addEventListener('click',e=>{
+      e.stopPropagation();
+      const task=tasks.find(t=>t.id===btn.dataset.today);
+      if(task){task.date=todayStr();task.archived=false;save();render();}
+    });
+  });
   document.querySelectorAll('.transfer-btn').forEach(btn=>{btn.addEventListener('click',e=>{e.stopPropagation();transferTaskId=btn.dataset.id;document.getElementById('t-date').value=todayStr();document.getElementById('transfer-modal').classList.add('open');});});
   document.querySelectorAll('textarea[data-field]').forEach(ta=>{ta.addEventListener('click',e=>e.stopPropagation());ta.addEventListener('input',()=>{if(ta.dataset.field==='note')updateNote(ta.dataset.id,ta.dataset.date,ta.value);else updateComment(ta.dataset.id,ta.dataset.date,ta.value);});});
   document.querySelectorAll('[data-search]').forEach(btn=>{btn.addEventListener('click',()=>{const p=btn.dataset.search;const inp=document.getElementById(`search-date-${p}`);if(inp&&inp.value){personalSearchDate[p]=inp.value;personalSearchResult[p]=inp.value;render();}});});
@@ -578,6 +617,17 @@ document.getElementById('t-confirm').addEventListener('click',()=>{
   const task=tasks.find(t=>t.id===transferTaskId);
   if(task&&newDate){task.date=newDate;task.archived=false;save();render();}
   document.getElementById('transfer-modal').classList.remove('open');transferTaskId=null;
+});
+document.getElementById('e-cancel').addEventListener('click',()=>{document.getElementById('edit-modal').classList.remove('open');editTaskId=null;});
+document.getElementById('e-save').addEventListener('click',()=>{
+  if(!editTaskId)return;
+  const task=tasks.find(t=>t.id===editTaskId);
+  if(task){
+    task.name=document.getElementById('e-name').value.trim()||task.name;
+    task.person=document.getElementById('e-person').value;
+  }
+  save();render();
+  document.getElementById('edit-modal').classList.remove('open');editTaskId=null;
 });
 
 const d=new Date();
