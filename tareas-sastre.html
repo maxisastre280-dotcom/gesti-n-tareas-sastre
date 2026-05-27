@@ -8,21 +8,12 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --brand: #EA048B;
-  --brand-dim: #b80370;
-  --bg: #111111;
-  --bg2: #1a1a1a;
-  --bg3: #222222;
-  --border: rgba(255,255,255,0.08);
-  --border2: rgba(255,255,255,0.14);
-  --text: #f0f0f0;
-  --text2: #aaaaaa;
-  --text3: #666666;
-  --process: #e6a817;
-  --done: #4caf7d;
-  --yesterday: #555;
-  --radius: 8px;
-  --font: 'DM Sans', sans-serif;
+  --brand: #EA048B; --brand-dim: #b80370;
+  --bg: #111111; --bg2: #1a1a1a; --bg3: #222222;
+  --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.14);
+  --text: #f0f0f0; --text2: #aaaaaa; --text3: #666666;
+  --process: #e6a817; --done: #4caf7d; --yesterday: #555;
+  --radius: 8px; --font: 'DM Sans', sans-serif;
 }
 body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; min-height: 100vh; }
 .header { background: var(--bg2); border-bottom: 0.5px solid var(--border2); padding: 10px 20px; display: flex; align-items: center; gap: 12px; }
@@ -35,11 +26,14 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); font
 .tab.active { color: var(--brand); border-bottom-color: var(--brand); font-weight: 500; }
 .content { padding: 16px 20px; max-width: 860px; }
 .date-group { margin-bottom: 22px; }
-.date-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 0.5px solid var(--border); }
+.date-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 0.5px solid var(--border); cursor: pointer; user-select: none; }
 .date-label { font-size: 12px; font-weight: 500; color: var(--text2); letter-spacing: 0.05em; text-transform: uppercase; }
 .date-label.today { color: var(--brand); }
 .date-label.yesterday-lbl { color: var(--yesterday); }
 .date-badge { font-size: 10px; background: var(--brand); color: #fff; border-radius: 10px; padding: 1px 7px; }
+.date-chevron { font-size: 11px; color: var(--text3); transition: transform 0.2s; margin-left: auto; }
+.date-group.collapsed .date-chevron { transform: rotate(-90deg); }
+.date-group.collapsed .date-tasks { display: none; }
 .task-item { border-radius: var(--radius); background: var(--bg2); border: 0.5px solid var(--border); margin-bottom: 6px; overflow: hidden; transition: border-color 0.15s; }
 .task-item:hover { border-color: var(--border2); }
 .task-item.yesterday-task { opacity: 0.65; }
@@ -60,18 +54,19 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); font
 .task-note-preview { font-size: 11px; color: var(--text3); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px; }
 .task-note-preview.proc { color: rgba(230,168,23,0.7); }
 .task-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-.transfer-btn { font-size: 10px; color: var(--text3); background: var(--bg3); border: 0.5px solid var(--border); border-radius: 4px; padding: 2px 7px; cursor: pointer; white-space: nowrap; }
-.transfer-btn:hover { color: var(--brand); border-color: var(--brand); }
+.btn-small { font-size: 10px; color: var(--text3); background: var(--bg3); border: 0.5px solid var(--border); border-radius: 4px; padding: 2px 7px; cursor: pointer; white-space: nowrap; }
+.btn-small:hover { color: var(--brand); border-color: var(--brand); }
+.btn-today { font-size: 10px; color: #fff; background: var(--done); border: none; border-radius: 4px; padding: 2px 8px; cursor: pointer; white-space: nowrap; font-family: var(--font); }
+.btn-today:hover { opacity: 0.85; }
 .del-btn { font-size: 16px; color: var(--text3); background: none; border: none; cursor: pointer; line-height: 1; padding: 0 2px; }
 .del-btn:hover { color: #e24b4a; }
-.edit-btn { font-size: 13px; color: var(--text3); background: none; border: none; cursor: pointer; line-height: 1; padding: 0 2px; }
+.edit-btn { font-size: 13px; color: var(--text3); background: none; border: none; cursor: pointer; padding: 0 2px; }
 .edit-btn:hover { color: var(--brand); }
-.transfer-today-btn { font-size: 10px; color: var(--text3); background: var(--bg3); border: 0.5px solid var(--border); border-radius: 4px; padding: 2px 7px; cursor: pointer; white-space: nowrap; }
-.transfer-today-btn:hover { color: var(--done); border-color: var(--done); }
 .chevron { font-size: 11px; color: var(--text3); transition: transform 0.2s; flex-shrink: 0; }
 .task-item.expanded .chevron { transform: rotate(180deg); }
 .task-detail { display: none; padding: 0 12px 10px 44px; }
 .task-item.expanded .task-detail { display: block; }
+.transfer-row { padding: 0 12px 8px 44px; display: flex; gap: 6px; }
 .task-note-input { width: 100%; background: var(--bg3); border: 0.5px solid var(--border2); border-radius: 5px; padding: 6px 8px; font-size: 12px; color: var(--text2); font-family: var(--font); resize: none; outline: none; }
 .task-note-input:focus { border-color: var(--process); color: var(--text); }
 .task-note-input.done-input:focus { border-color: rgba(76,175,125,0.5); }
@@ -100,20 +95,13 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); font
 .btn-cancel { flex: 1; padding: 8px; background: var(--bg3); border: 0.5px solid var(--border); border-radius: 6px; color: var(--text2); cursor: pointer; font-size: 13px; }
 .btn-add { flex: 2; padding: 8px; background: var(--brand); border: none; border-radius: 6px; color: #fff; cursor: pointer; font-size: 13px; font-weight: 500; }
 .btn-add:hover { background: var(--brand-dim); }
-.transfer-modal { background: var(--bg2); border: 0.5px solid var(--border2); border-radius: 12px; padding: 20px; width: 300px; }
 .month-nav { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
 .month-nav-btn { background: var(--bg3); border: 0.5px solid var(--border); border-radius: 6px; color: var(--text2); padding: 4px 10px; cursor: pointer; font-size: 13px; }
 .month-nav-btn:hover { border-color: var(--brand); color: var(--brand); }
 .month-label { font-size: 13px; color: var(--text); font-weight: 500; }
 .empty { font-size: 12px; color: var(--text3); padding: 10px 0; }
-.date-header { cursor: pointer; user-select: none; }
-.date-header:hover .date-label { opacity: 0.8; }
-.date-chevron { font-size: 11px; color: var(--text3); transition: transform 0.2s; margin-left: auto; }
-.date-group.collapsed .date-chevron { transform: rotate(-90deg); }
-.date-group.collapsed .date-tasks { display: none; }
 .search-ahead { display: flex; align-items: center; gap: 10px; margin-top: 8px; padding: 10px 12px; border-radius: var(--radius); border: 0.5px dashed var(--border2); }
 .search-ahead input[type=date] { background: var(--bg3); border: 0.5px solid var(--border2); border-radius: 6px; padding: 5px 8px; font-size: 12px; color: var(--text2); font-family: var(--font); outline: none; }
-.search-ahead input[type=date]:focus { border-color: var(--brand); }
 .search-ahead-btn { background: var(--bg3); border: 0.5px solid var(--border2); border-radius: 6px; padding: 5px 12px; font-size: 12px; color: var(--text2); cursor: pointer; }
 .search-ahead-btn:hover { border-color: var(--brand); color: var(--brand); }
 .search-ahead-label { font-size: 11px; color: var(--text3); }
@@ -151,21 +139,20 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); font
 </div>
 
 <div class="content" id="content"><div class="loading">Cargando...</div></div>
-<button class="add-fab" id="fab">+</button>
+<button class="add-fab" onclick="openAddModal()">+</button>
 
+<!-- Modal nueva tarea -->
 <div class="modal-backdrop" id="modal">
   <div class="modal">
     <div class="modal-title">Nueva tarea</div>
     <label>Responsable</label>
-    <select id="m-person">
-      <option>Máximo</option><option>Johana</option><option>Milagros</option><option>Coca</option><option>Rocío</option>
-    </select>
+    <select id="m-person"><option>Máximo</option><option>Johana</option><option>Milagros</option><option>Coca</option><option>Rocío</option></select>
     <label>Tarea</label>
     <input type="text" id="m-name" placeholder="Nombre de la tarea..." />
     <label>Tipo</label>
     <div class="radio-group">
-      <div class="radio-opt selected" data-type="day" id="opt-day">Del día</div>
-      <div class="radio-opt" data-type="recur" id="opt-recur">Recurrente</div>
+      <div class="radio-opt selected" data-type="day" id="opt-day" onclick="setTaskType('day')">Del día</div>
+      <div class="radio-opt" data-type="recur" id="opt-recur" onclick="setTaskType('recur')">Recurrente</div>
     </div>
     <div id="day-opts" style="margin-top:10px;">
       <label>Fecha</label>
@@ -176,47 +163,46 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); font
       <input type="date" id="m-recur-start" style="margin-bottom:8px;" />
       <label>Frecuencia</label>
       <div class="recur-row">
-        <div class="recur-choice selected" data-recur="daily" id="rc-daily">Todos los días</div>
-        <div class="recur-choice" data-recur="weekly" id="rc-weekly">Este día de la semana</div>
-        <div class="recur-choice" data-recur="monthly" id="rc-monthly">Este día del mes</div>
+        <div class="recur-choice selected" id="rc-daily" onclick="setRecurType('daily')">Todos los días</div>
+        <div class="recur-choice" id="rc-weekly" onclick="setRecurType('weekly')">Este día de la semana</div>
+        <div class="recur-choice" id="rc-monthly" onclick="setRecurType('monthly')">Este día del mes</div>
       </div>
     </div>
     <div class="modal-actions">
-      <button class="btn-cancel" id="m-cancel">Cancelar</button>
-      <button class="btn-add" id="m-save">Agregar</button>
+      <button class="btn-cancel" onclick="closeModal('modal')">Cancelar</button>
+      <button class="btn-add" onclick="saveTask()">Agregar</button>
     </div>
   </div>
 </div>
 
+<!-- Modal trasladar fecha -->
 <div class="modal-backdrop" id="transfer-modal">
-  <div class="transfer-modal">
-    <div class="modal-title">Trasladar tarea a otro día</div>
+  <div class="modal" style="width:300px;">
+    <div class="modal-title">Trasladar a otra fecha</div>
     <label>Nueva fecha</label>
-    <input type="date" id="t-date" style="width:100%;background:var(--bg3);border:0.5px solid var(--border2);border-radius:6px;padding:7px 10px;font-size:13px;color:var(--text);font-family:var(--font);outline:none;"/>
+    <input type="date" id="t-date" />
     <div class="modal-actions">
-      <button class="btn-cancel" id="t-cancel">Cancelar</button>
-      <button class="btn-add" id="t-confirm">Trasladar</button>
+      <button class="btn-cancel" onclick="closeModal('transfer-modal')">Cancelar</button>
+      <button class="btn-add" onclick="confirmTransfer()">Trasladar</button>
     </div>
   </div>
 </div>
 
+<!-- Modal editar tarea -->
 <div class="modal-backdrop" id="edit-modal">
   <div class="modal">
     <div class="modal-title">Editar tarea</div>
     <label>Nombre</label>
     <input type="text" id="e-name" placeholder="Nombre de la tarea..." />
     <label>Responsable</label>
-    <select id="e-person">
-      <option>Máximo</option><option>Johana</option><option>Milagros</option><option>Coca</option><option>Rocío</option>
-    </select>
+    <select id="e-person"><option>Máximo</option><option>Johana</option><option>Milagros</option><option>Coca</option><option>Rocío</option></select>
     <div class="modal-actions">
-      <button class="btn-cancel" id="e-cancel">Cancelar</button>
-      <button class="btn-add" id="e-save">Guardar</button>
+      <button class="btn-cancel" onclick="closeModal('edit-modal')">Cancelar</button>
+      <button class="btn-add" onclick="confirmEdit()">Guardar</button>
     </div>
   </div>
 </div>
 
-<!-- Firebase SDK -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -227,8 +213,7 @@ const firebaseConfig = {
   projectId: "gestion-tareas-sastre",
   storageBucket: "gestion-tareas-sastre.firebasestorage.app",
   messagingSenderId: "280753469716",
-  appId: "1:280753469716:web:8dea59b02460f8ef00aa01",
-  measurementId: "G-GH72FJX6JP"
+  appId: "1:280753469716:web:8dea59b02460f8ef00aa01"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -238,278 +223,381 @@ const PERSONS = ['Máximo','Johana','Milagros','Coca','Rocío'];
 const DAYS_ES = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
 const MONTHS_ES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 
-function todayStr() { const d=new Date(); return fmtDate(d); }
+// ── Helpers de fecha ──────────────────────────────────────────
+function todayStr() { return fmtDate(new Date()); }
 function fmtDate(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 function addDays(s,n) { const d=parseDate(s); d.setDate(d.getDate()+n); return fmtDate(d); }
 function parseDate(s) { const [y,m,d]=s.split('-').map(Number); return new Date(y,m-1,d); }
 function displayDate(s) { const d=parseDate(s); return `${DAYS_ES[d.getDay()]} ${d.getDate()} de ${MONTHS_ES[d.getMonth()]}`; }
 function yesterdayStr() { return addDays(todayStr(),-1); }
 
-let tasks=[], currentTab='general', viewOffset=0, transferTaskId=null, editTaskId=null, recurType='daily', taskType='day';
-let expandedTasks=new Set(), personalSearchDate={}, personalSearchResult={};
-let saveTimeout=null;
+// ── Estado global ─────────────────────────────────────────────
+let tasks = [];
+let currentTab = 'general';
+let viewOffset = 0;
+let transferTaskId = null;
+let editTaskId = null;
+let taskType = 'day';
+let recurType = 'daily';
+let expandedKeys = new Set();
+let collapsedDates = new Set();
+let personalSearchDate = {};
+let personalSearchResult = {};
+let saveTimeout = null;
 
+// ── Firebase ──────────────────────────────────────────────────
 async function load() {
   try {
-    const ref = doc(db, 'datos', 'tareas');
-    const snap = await getDoc(ref);
-    if (snap.exists()) tasks = snap.data().lista || [];
-    else tasks = [];
-  } catch(e) { console.error(e); tasks=[]; }
+    const snap = await getDoc(doc(db,'datos','tareas'));
+    tasks = snap.exists() ? (snap.data().lista || []) : [];
+  } catch(e) { tasks = []; }
   archiveOld();
   render();
 }
 
-function cleanTask(task) {
-  const t = {...task};
-  Object.keys(t).forEach(k => { if(t[k]===undefined||t[k]===null) delete t[k]; });
-  if(t.states) {
-    const cleanStates = {};
-    Object.keys(t.states).forEach(d => {
-      const s = {...t.states[d]};
-      Object.keys(s).forEach(k => { if(s[k]===undefined||s[k]===null) delete s[k]; });
-      cleanStates[d] = s;
-    });
-    t.states = cleanStates;
-  }
-  return t;
+function cleanObj(obj) {
+  const o = {...obj};
+  Object.keys(o).forEach(k => { if(o[k]===undefined||o[k]===null) delete o[k]; });
+  return o;
 }
 
-async function save() {
+function scheduleSave() {
   clearTimeout(saveTimeout);
   saveTimeout = setTimeout(async () => {
     try {
-      const cleanTasks = tasks.map(cleanTask);
-      await setDoc(doc(db,'datos','tareas'), { lista: cleanTasks });
-    } catch(e) { console.error('Error guardando:', e); }
-  }, 800);
+      const lista = tasks.map(t => {
+        const c = cleanObj(t);
+        if(c.states) { const cs={}; Object.keys(c.states).forEach(d=>{ cs[d]=cleanObj(c.states[d]); }); c.states=cs; }
+        return c;
+      });
+      await setDoc(doc(db,'datos','tareas'), {lista});
+    } catch(e) { console.error('Error guardando:',e); }
+  }, 600);
 }
 
 function archiveOld() {
-  const yest=yesterdayStr();
-  tasks.forEach(t=>{if(!t.archived&&!t.recurrent&&t.date&&t.date<yest)t.archived=true;});
+  const yest = yesterdayStr();
+  tasks.forEach(t => { if(!t.archived && !t.recurrent && t.date && t.date < yest) t.archived = true; });
 }
 
-function generateId(){return Date.now()+Math.random().toString(36).slice(2);}
+function genId() { return Date.now()+Math.random().toString(36).slice(2); }
 
-function getDateRange() {
-  const today=new Date();
-  const start=new Date(today.getFullYear(),today.getMonth()+viewOffset,1);
-  const end=new Date(today.getFullYear(),today.getMonth()+viewOffset+1,0);
-  const dates=[];
-  if(viewOffset===0){dates.push(yesterdayStr());dates.push(todayStr());}
-  const cur=new Date(start);
-  while(cur<=end){const s=fmtDate(cur);if(!dates.includes(s))dates.push(s);cur.setDate(cur.getDate()+1);}
-  tasks.filter(t=>!t.archived&&!t.recurrent&&t.date>todayStr()).forEach(t=>{if(!dates.includes(t.date))dates.push(t.date);});
-  return [...new Set(dates)].sort();
-}
-
-function isRecurActive(task,dateStr) {
-  const sd=task.recurFrom||task.date;
-  if(dateStr<sd)return false;
-  const d=parseDate(dateStr);
-  if(task.recur==='daily')return true;
-  if(task.recur==='weekly')return d.getDay()===parseDate(sd).getDay();
-  if(task.recur==='monthly')return d.getDate()===parseDate(sd).getDate();
+// ── Lógica de tareas ──────────────────────────────────────────
+function isRecurActive(task, dateStr) {
+  const sd = task.recurFrom || task.date;
+  if(!sd || dateStr < sd) return false;
+  const d = parseDate(dateStr);
+  if(task.recur==='daily') return true;
+  if(task.recur==='weekly') return d.getDay()===parseDate(sd).getDay();
+  if(task.recur==='monthly') return d.getDate()===parseDate(sd).getDate();
   return false;
 }
 
-function getTasksForDate(dateStr,person) {
-  return tasks.filter(t=>{
-    if(person&&t.person!==person)return false;
-    if(t.archived)return false;
-    if(t.recurrent)return isRecurActive(t,dateStr);
+function getTasksForDate(dateStr, person) {
+  return tasks.filter(t => {
+    if(person && t.person!==person) return false;
+    if(t.archived) return false;
+    if(t.recurrent) return isRecurActive(t, dateStr);
     return t.date===dateStr;
   });
 }
 
-function getStateForDate(task,dateStr) {
-  if(task.recurrent&&task.states)return task.states[dateStr]||{status:'pending',note:'',comment:''};
-  return{status:task.status||'pending',note:task.note||'',comment:task.comment||''};
+function getState(task, dateStr) {
+  if(task.recurrent && task.states) return task.states[dateStr] || {status:'pending',note:'',comment:''};
+  return {status:task.status||'pending', note:task.note||'', comment:task.comment||''};
 }
 
-function setStateForDate(task,dateStr,state) {
-  if(task.recurrent){if(!task.states)task.states={};task.states[dateStr]=state;}
-  else{task.status=state.status;task.note=state.note;task.comment=state.comment;}
+function setState(task, dateStr, state) {
+  if(task.recurrent) { if(!task.states) task.states={}; task.states[dateStr]=state; }
+  else { task.status=state.status; task.note=state.note; task.comment=state.comment; }
 }
 
-function cycleState(taskId,dateStr,e) {
-  e.stopPropagation();
-  const task=tasks.find(t=>t.id===taskId);if(!task)return;
-  const s=getStateForDate(task,dateStr);
-  const next={pending:'process',process:'done',done:'pending'};
-  const newStatus=next[s.status]||'pending';
-  const ns={...s,status:newStatus};
-  if(newStatus==='done')ns.note='';
-  if(newStatus==='pending'){ns.note='';ns.comment='';}
-  setStateForDate(task,dateStr,ns);
-  save();render();
-}
+// ── Acciones globales (llamadas desde onclick en HTML) ─────────
+window.cycleState = function(taskId, dateStr) {
+  const task = tasks.find(t=>t.id===taskId); if(!task) return;
+  const s = getState(task, dateStr);
+  const next = {pending:'process',process:'done',done:'pending'};
+  const ns = {...s, status:next[s.status]||'pending'};
+  if(ns.status==='done') ns.note='';
+  if(ns.status==='pending') { ns.note=''; ns.comment=''; }
+  setState(task, dateStr, ns);
+  scheduleSave(); render();
+};
 
-function toggleExpand(key,e) {
-  if(e.target.closest('.del-btn')||e.target.closest('.transfer-btn')||e.target.closest('.transfer-today-btn')||e.target.closest('.state-btn')||e.target.closest('.edit-btn'))return;
-  if(expandedTasks.has(key))expandedTasks.delete(key);else expandedTasks.add(key);
+window.toggleExpand = function(key) {
+  if(expandedKeys.has(key)) expandedKeys.delete(key); else expandedKeys.add(key);
   render();
+};
+
+window.toggleDate = function(dateStr) {
+  if(collapsedDates.has(dateStr)) collapsedDates.delete(dateStr); else collapsedDates.add(dateStr);
+  render();
+};
+
+window.deleteTask = function(taskId) {
+  tasks = tasks.filter(t=>t.id!==taskId);
+  scheduleSave(); render();
+};
+
+window.openEditModal = function(taskId) {
+  editTaskId = taskId;
+  const task = tasks.find(t=>t.id===taskId); if(!task) return;
+  document.getElementById('e-name').value = task.name;
+  document.getElementById('e-person').value = task.person;
+  document.getElementById('edit-modal').classList.add('open');
+};
+
+window.confirmEdit = function() {
+  const task = tasks.find(t=>t.id===editTaskId); if(!task) return;
+  const name = document.getElementById('e-name').value.trim();
+  if(name) task.name = name;
+  task.person = document.getElementById('e-person').value;
+  scheduleSave(); render();
+  closeModal('edit-modal'); editTaskId=null;
+};
+
+window.openTransferModal = function(taskId) {
+  transferTaskId = taskId;
+  document.getElementById('t-date').value = todayStr();
+  document.getElementById('transfer-modal').classList.add('open');
+};
+
+window.confirmTransfer = function() {
+  const task = tasks.find(t=>t.id===transferTaskId); if(!task) return;
+  const newDate = document.getElementById('t-date').value;
+  if(newDate) { task.date=newDate; task.archived=false; }
+  scheduleSave(); render();
+  closeModal('transfer-modal'); transferTaskId=null;
+};
+
+window.moveToToday = function(taskId) {
+  const task = tasks.find(t=>t.id===taskId); if(!task) return;
+  task.date = todayStr();
+  task.archived = false;
+  scheduleSave(); render();
+};
+
+window.updateNote = function(taskId, dateStr, val) {
+  const task = tasks.find(t=>t.id===taskId); if(!task) return;
+  setState(task, dateStr, {...getState(task,dateStr), note:val});
+  scheduleSave();
+};
+
+window.updateComment = function(taskId, dateStr, val) {
+  const task = tasks.find(t=>t.id===taskId); if(!task) return;
+  setState(task, dateStr, {...getState(task,dateStr), comment:val});
+  scheduleSave();
+};
+
+window.openAddModal = function() {
+  document.getElementById('m-date').value = todayStr();
+  document.getElementById('m-recur-start').value = todayStr();
+  document.getElementById('m-name').value = '';
+  document.getElementById('modal').classList.add('open');
+};
+
+window.closeModal = function(id) {
+  document.getElementById(id).classList.remove('open');
+};
+
+window.setTaskType = function(type) {
+  taskType = type;
+  document.getElementById('opt-day').classList.toggle('selected', type==='day');
+  document.getElementById('opt-recur').classList.toggle('selected', type==='recur');
+  document.getElementById('day-opts').style.display = type==='day'?'block':'none';
+  document.getElementById('recur-opts').classList.toggle('show', type==='recur');
+};
+
+window.setRecurType = function(type) {
+  recurType = type;
+  ['rc-daily','rc-weekly','rc-monthly'].forEach(id=>document.getElementById(id).classList.remove('selected'));
+  document.getElementById('rc-'+type.replace('ly','')).classList.add('selected');
+};
+
+window.saveTask = function() {
+  const name = document.getElementById('m-name').value.trim();
+  const person = document.getElementById('m-person').value;
+  if(!name) return;
+  const dateVal = document.getElementById('m-date').value || todayStr();
+  const recurStart = document.getElementById('m-recur-start').value || todayStr();
+  const task = {
+    id: genId(), name, person,
+    recurrent: taskType==='recur',
+    date: taskType==='day' ? dateVal : recurStart,
+    status:'pending', note:'', comment:'', archived:false
+  };
+  if(taskType==='recur') { task.recurFrom=recurStart; task.recur=recurType; task.states={}; }
+  tasks.push(task);
+  scheduleSave(); render();
+  closeModal('modal');
+};
+
+window.doSearch = function(person) {
+  const val = document.getElementById('search-date-'+person).value;
+  if(val) { personalSearchDate[person]=val; personalSearchResult[person]=val; render(); }
+};
+
+// ── Render ────────────────────────────────────────────────────
+function stateIcon(status) {
+  if(status==='pending') return '&#9633;';
+  if(status==='process') return '&#9201;';
+  return '&#10003;';
 }
 
-function updateNote(taskId,dateStr,val){const t=tasks.find(t=>t.id===taskId);if(!t)return;setStateForDate(t,dateStr,{...getStateForDate(t,dateStr),note:val});save();}
-function updateComment(taskId,dateStr,val){const t=tasks.find(t=>t.id===taskId);if(!t)return;setStateForDate(t,dateStr,{...getStateForDate(t,dateStr),comment:val});save();}
-function deleteTask(taskId,e){e.stopPropagation();tasks=tasks.filter(t=>t.id!==taskId);save();render();}
-
-function renderStateBtn(status) {
-  if(status==='pending')return`<div class="state-btn">&#9633;</div>`;
-  if(status==='process')return`<div class="state-btn in-process">&#9201;</div>`;
-  return`<div class="state-btn done">&#10003;</div>`;
+function stateClass(status) {
+  if(status==='process') return 'in-process';
+  if(status==='done') return 'done';
+  return '';
 }
 
-function renderTask(task,dateStr,isYest,showPerson) {
-  const state=getStateForDate(task,dateStr);
-  const{status,note,comment}=state;
-  const key=task.id+'_'+dateStr;
-  const isExpanded=expandedTasks.has(key);
-  const yestClass=isYest?'yesterday-task':'';
-  const doneClass=status==='done'?'done-task':'';
-  const expClass=isExpanded?'expanded':'';
-  const nameClass=status==='done'?'done-text':'';
-  const excl=isYest&&status!=='done'?`<span class="task-excl">⚠ </span>`:'';
-  const transferBtn=isYest&&status!=='done'?`<button class="transfer-today-btn" onclick="moveToToday('${task.id}');event.stopPropagation();" title="Mover a hoy">→ Mover a hoy</button>`:'';
-  const personTag=showPerson?`<span class="task-person">${task.person}</span>`:'';
-  const recurTag=task.recurrent?`<span class="task-recur">↻</span>`:'';
-  let preview='';
-  if(!isExpanded){
-    if(status==='process'&&note)preview=`<div class="task-note-preview proc">${note}</div>`;
-    if(status==='done'&&comment)preview=`<div class="task-note-preview">${comment}</div>`;
+function renderTask(task, dateStr, isYest, showPerson) {
+  const state = getState(task, dateStr);
+  const {status, note, comment} = state;
+  const key = task.id+'_'+dateStr;
+  const isExpanded = expandedKeys.has(key);
+  const nameClass = status==='done' ? 'done-text' : '';
+  const itemClass = [isYest?'yesterday-task':'', status==='done'?'done-task':'', isExpanded?'expanded':''].join(' ');
+  const excl = isYest && status!=='done' ? '<span class="task-excl">⚠ </span>' : '';
+  const personTag = showPerson ? `<span class="task-person">${task.person}</span>` : '';
+  const recurTag = task.recurrent ? '<span class="task-recur">↻</span>' : '';
+  let preview = '';
+  if(!isExpanded) {
+    if(status==='process' && note) preview=`<div class="task-note-preview proc">${note}</div>`;
+    if(status==='done' && comment) preview=`<div class="task-note-preview">${comment}</div>`;
   }
-  let detail='';
-  if(status==='process')detail=`<div class="task-detail"><div class="detail-label">Situación actual</div><textarea class="task-note-input" rows="2" placeholder="Ej: esperando respuesta del cliente..." data-id="${task.id}" data-date="${dateStr}" data-field="note">${note||''}</textarea></div>`;
-  if(status==='done')detail=`<div class="task-detail"><div class="detail-label">Comentario final (opcional)</div><textarea class="task-note-input done-input" rows="2" placeholder="Agregar una nota..." data-id="${task.id}" data-date="${dateStr}" data-field="comment">${comment||''}</textarea></div>`;
-  const showChevron=status==='process'||status==='done';
-  const chevron=showChevron?`<span class="chevron">&#8964;</span>`:'';
-  const editBtn=`<button class="edit-btn" data-edit="${task.id}" title="Editar">✎</button>`;
-  // Transfer buttons go outside task-row to avoid click conflicts
-  const transferRow = transferBtn ? `<div style="padding:0 12px 8px 44px;display:flex;gap:6px;">${transferBtn}</div>` : '';
-  return`<div class="task-item ${yestClass} ${doneClass} ${expClass}">
-    <div class="task-row" data-toggle="${key}">
-      <div data-state-btn="${task.id}" data-date="${dateStr}">${renderStateBtn(status)}</div>
+  const showChevron = status==='process'||status==='done';
+  const chevron = showChevron ? `<span class="chevron">&#8964;</span>` : '';
+  let detail = '';
+  if(isExpanded) {
+    if(status==='process') detail=`<div class="task-detail"><div class="detail-label">Situación actual</div><textarea class="task-note-input" rows="2" placeholder="Ej: esperando respuesta del cliente..." oninput="updateNote('${task.id}','${dateStr}',this.value)" onclick="event.stopPropagation()">${note||''}</textarea></div>`;
+    if(status==='done') detail=`<div class="task-detail"><div class="detail-label">Comentario final (opcional)</div><textarea class="task-note-input done-input" rows="2" placeholder="Agregar una nota..." oninput="updateComment('${task.id}','${dateStr}',this.value)" onclick="event.stopPropagation()">${comment||''}</textarea></div>`;
+  }
+  // Transfer row for yesterday unfinished tasks
+  const transferRow = (isYest && status!=='done') ? `<div class="transfer-row"><button class="btn-today" onclick="moveToToday('${task.id}')">→ Mover a hoy</button><button class="btn-small" onclick="openTransferModal('${task.id}')">Otra fecha</button></div>` : '';
+
+  return `<div class="task-item ${itemClass}">
+    <div class="task-row" onclick="toggleExpand('${key}')">
+      <div class="state-btn ${stateClass(status)}" onclick="event.stopPropagation();cycleState('${task.id}','${dateStr}')">${stateIcon(status)}</div>
       <div class="task-main">
         <div class="task-name ${nameClass}">${excl}${task.name}</div>
         <div class="task-meta">${personTag}${recurTag}</div>
         ${preview}
       </div>
-      <div class="task-actions">${editBtn}<button class="del-btn" data-del="${task.id}">×</button>${chevron}</div>
+      <div class="task-actions">
+        <button class="edit-btn" onclick="event.stopPropagation();openEditModal('${task.id}')">✎</button>
+        <button class="del-btn" onclick="event.stopPropagation();deleteTask('${task.id}')">×</button>
+        ${chevron}
+      </div>
     </div>
     ${transferRow}
     ${detail}
   </div>`;
 }
 
-function renderDateGroupPersonal(dateStr,taskList,isYest,isToday) {
-  const labelClass=isToday?'today':(isYest?'yesterday-lbl':'');
-  const badge=isToday?`<span class="date-badge">HOY</span>`:(isYest?`<span class="date-badge" style="background:var(--yesterday)">AYER</span>`:'');
-  const pending=taskList.filter(t=>getStateForDate(t,dateStr).status==='pending');
-  const inProcess=taskList.filter(t=>getStateForDate(t,dateStr).status==='process');
-  const done=taskList.filter(t=>getStateForDate(t,dateStr).status==='done');
-  // Show exclamation if yesterday has unfinished tasks
-  const hasUnfinished = isYest && (pending.length > 0 || inProcess.length > 0);
-  const exclamation = hasUnfinished ? `<span style="color:#e6a817;font-size:12px;margin-left:6px;" title="Tareas sin cerrar">⚠</span>` : '';
-  // Collapse future dates by default
-  const collapsed = (!isToday && !isYest) ? 'collapsed' : '';
-  const chevron = (!isToday && !isYest) ? `<span class="date-chevron">&#8964;</span>` : '';
-  let html=`<div class="date-group ${collapsed}" data-dategroup="${dateStr}"><div class="date-header" data-toggle-date="${dateStr}"><span class="date-label ${labelClass}">${displayDate(dateStr)}</span>${badge}${exclamation}${chevron}</div><div class="date-tasks">`;
-  if(taskList.length===0){html+=`<div class="empty">Sin tareas.</div>`;}
-  else{
-    pending.forEach(t=>{html+=renderTask(t,dateStr,isYest,false);});
-    if(inProcess.length>0){
-      if(pending.length>0)html+=`<div class="status-divider"><div class="status-divider-dot" style="background:var(--process)"></div><span class="status-divider-label" style="color:var(--process)">En proceso</span></div>`;
-      inProcess.forEach(t=>{html+=renderTask(t,dateStr,isYest,false);});
+function renderDateGroup(dateStr, taskList, isYest, isToday, showPerson, collapsible) {
+  const labelClass = isToday?'today':(isYest?'yesterday-lbl':'');
+  const badge = isToday?`<span class="date-badge">HOY</span>`:(isYest?`<span class="date-badge" style="background:var(--yesterday)">AYER</span>`:'');
+  const hasUnfinished = isYest && taskList.some(t=>getState(t,dateStr).status!=='done');
+  const exclamation = hasUnfinished ? '<span style="color:#e6a817;font-size:12px;">⚠</span>' : '';
+  const isCollapsed = collapsible && collapsedDates.has(dateStr);
+  const collapsedClass = isCollapsed ? 'collapsed' : '';
+  const chevron = collapsible ? `<span class="date-chevron">${isCollapsed?'&#8250;':'&#8964;'}</span>` : '';
+  const toggleFn = collapsible ? `onclick="toggleDate('${dateStr}')"` : '';
+
+  const pending = taskList.filter(t=>getState(t,dateStr).status==='pending');
+  const inProcess = taskList.filter(t=>getState(t,dateStr).status==='process');
+  const done = taskList.filter(t=>getState(t,dateStr).status==='done');
+
+  let tasksHtml = '';
+  if(taskList.length===0) { tasksHtml='<div class="empty">Sin tareas.</div>'; }
+  else {
+    pending.forEach(t=>{ tasksHtml+=renderTask(t,dateStr,isYest,showPerson); });
+    if(inProcess.length>0) {
+      if(pending.length>0) tasksHtml+=`<div class="status-divider"><div class="status-divider-dot" style="background:var(--process)"></div><span class="status-divider-label" style="color:var(--process)">En proceso</span></div>`;
+      inProcess.forEach(t=>{ tasksHtml+=renderTask(t,dateStr,isYest,showPerson); });
     }
-    if(done.length>0){
-      if(pending.length>0||inProcess.length>0)html+=`<div class="status-divider"><div class="status-divider-dot" style="background:var(--done)"></div><span class="status-divider-label" style="color:var(--done)">Finalizadas</span></div>`;
-      done.forEach(t=>{html+=renderTask(t,dateStr,isYest,false);});
+    if(done.length>0) {
+      if(pending.length>0||inProcess.length>0) tasksHtml+=`<div class="status-divider"><div class="status-divider-dot" style="background:var(--done)"></div><span class="status-divider-label" style="color:var(--done)">Finalizadas</span></div>`;
+      done.forEach(t=>{ tasksHtml+=renderTask(t,dateStr,isYest,showPerson); });
     }
   }
-  html+=`</div></div>`;
-  return html;
+
+  return `<div class="date-group ${collapsedClass}">
+    <div class="date-header" ${toggleFn}>
+      <span class="date-label ${labelClass}">${displayDate(dateStr)}</span>${badge}${exclamation}${chevron}
+    </div>
+    <div class="date-tasks">${isCollapsed?'':tasksHtml}</div>
+  </div>`;
 }
 
-function renderDateGroupGeneral(dateStr,taskList,isYest,isToday) {
-  const labelClass=isToday?'today':(isYest?'yesterday-lbl':'');
-  const badge=isToday?`<span class="date-badge">HOY</span>`:(isYest?`<span class="date-badge" style="background:var(--yesterday)">AYER</span>`:'');
-  const collapsed = (!isToday && !isYest) ? 'collapsed' : '';
-  const chevron = (!isToday && !isYest) ? `<span class="date-chevron">&#8964;</span>` : '';
-  // Exclamation if yesterday has unfinished tasks
-  const hasUnfinished = isYest && taskList.some(t=>getStateForDate(t,dateStr).status!=='done');
-  const exclamation = hasUnfinished ? `<span style="color:#e6a817;font-size:12px;margin-left:6px;" title="Tareas sin cerrar">⚠</span>` : '';
-  // Sort by status: pending → process → done
-  const pending=taskList.filter(t=>getStateForDate(t,dateStr).status==='pending');
-  const inProcess=taskList.filter(t=>getStateForDate(t,dateStr).status==='process');
-  const done=taskList.filter(t=>getStateForDate(t,dateStr).status==='done');
-  let html=`<div class="date-group ${collapsed}" data-dategroup="${dateStr}"><div class="date-header" data-toggle-date="${dateStr}"><span class="date-label ${labelClass}">${displayDate(dateStr)}</span>${badge}${exclamation}${chevron}</div><div class="date-tasks">`;
-  if(taskList.length===0){
-    html+=`<div class="empty">Sin tareas.</div>`;
-  } else {
-    pending.forEach(t=>{html+=renderTask(t,dateStr,isYest,true);});
-    if(inProcess.length>0){
-      if(pending.length>0)html+=`<div class="status-divider"><div class="status-divider-dot" style="background:var(--process)"></div><span class="status-divider-label" style="color:var(--process)">En proceso</span></div>`;
-      inProcess.forEach(t=>{html+=renderTask(t,dateStr,isYest,true);});
-    }
-    if(done.length>0){
-      if(pending.length>0||inProcess.length>0)html+=`<div class="status-divider"><div class="status-divider-dot" style="background:var(--done)"></div><span class="status-divider-label" style="color:var(--done)">Finalizadas</span></div>`;
-      done.forEach(t=>{html+=renderTask(t,dateStr,isYest,true);});
-    }
-  }
-  html+=`</div></div>`;
-  return html;
+function getDateRange() {
+  const today = new Date();
+  const start = new Date(today.getFullYear(), today.getMonth()+viewOffset, 1);
+  const end = new Date(today.getFullYear(), today.getMonth()+viewOffset+1, 0);
+  const dates = [];
+  if(viewOffset===0) { dates.push(yesterdayStr()); dates.push(todayStr()); }
+  const cur = new Date(start);
+  while(cur<=end) { const s=fmtDate(cur); if(!dates.includes(s)) dates.push(s); cur.setDate(cur.getDate()+1); }
+  tasks.filter(t=>!t.archived&&!t.recurrent&&t.date>todayStr()).forEach(t=>{ if(!dates.includes(t.date)) dates.push(t.date); });
+  return [...new Set(dates)].sort();
 }
 
 function renderGeneral() {
-  const today=todayStr();const yest=yesterdayStr();
+  const today=todayStr(), yest=yesterdayStr();
   const dates=getDateRange();
   const now=new Date();
   const refMonth=new Date(now.getFullYear(),now.getMonth()+viewOffset);
   const monthName=`${MONTHS_ES[refMonth.getMonth()]} ${refMonth.getFullYear()}`;
-  let html=`<div class="month-nav"><button class="month-nav-btn" id="prev-month">&#8592;</button><span class="month-label">${viewOffset===0?'Este mes':monthName}</span><button class="month-nav-btn" id="next-month">&#8594;</button></div>`;
+  let html=`<div class="month-nav">
+    <button class="month-nav-btn" onclick="changeMonth(-1)">&#8592;</button>
+    <span class="month-label">${viewOffset===0?'Este mes':monthName}</span>
+    <button class="month-nav-btn" onclick="changeMonth(1)">&#8594;</button>
+  </div>`;
   let hasAny=false;
   dates.forEach(dateStr=>{
-    const taskList=getTasksForDate(dateStr,null);
-    const isYest=dateStr===yest;const isToday=dateStr===today;
-    if(taskList.length===0&&!isToday&&!isYest)return;
+    const tl=getTasksForDate(dateStr,null);
+    const isYest=dateStr===yest, isToday=dateStr===today;
+    if(tl.length===0&&!isToday&&!isYest) return;
     hasAny=true;
-    html+=renderDateGroupGeneral(dateStr,taskList,isYest,isToday);
+    const collapsible=!isToday&&!isYest;
+    if(collapsible&&!collapsedDates.has(dateStr)) collapsedDates.add(dateStr); // default collapsed
+    html+=renderDateGroup(dateStr,tl,isYest,isToday,true,collapsible);
   });
-  if(!hasAny)html+=`<div class="empty">No hay tareas en este período.</div>`;
+  if(!hasAny) html+='<div class="empty">No hay tareas en este período.</div>';
   return html;
 }
 
 function renderPersonal(person) {
-  const today=todayStr();const yest=yesterdayStr();
-  const day1=addDays(today,1);const day2=addDays(today,2);
+  const today=todayStr(), yest=yesterdayStr();
+  const day1=addDays(today,1), day2=addDays(today,2);
   const visibleDates=[yest,today,day1,day2];
   let html='';
   visibleDates.forEach(dateStr=>{
-    const taskList=getTasksForDate(dateStr,person);
-    const isYest=dateStr===yest;const isToday=dateStr===today;
-    if(taskList.length===0&&!isToday&&!isYest)return;
-    html+=renderDateGroupPersonal(dateStr,taskList,isYest,isToday);
+    const tl=getTasksForDate(dateStr,person);
+    const isYest=dateStr===yest, isToday=dateStr===today;
+    if(tl.length===0&&!isToday&&!isYest) return;
+    const collapsible=!isToday&&!isYest;
+    if(collapsible&&!collapsedDates.has(person+'_'+dateStr)) collapsedDates.add(person+'_'+dateStr);
+    html+=renderDateGroup(dateStr,tl,isYest,isToday,false,collapsible);
   });
   const searchVal=personalSearchDate[person]||'';
   const searchResult=personalSearchResult[person];
-  html+=`<div class="search-ahead"><span class="search-ahead-label">Ver otra fecha:</span><input type="date" id="search-date-${person}" value="${searchVal}" min="${addDays(day2,1)}" /><button class="search-ahead-btn" data-search="${person}">Buscar</button></div>`;
-  if(searchResult){
-    const srTasks=getTasksForDate(searchResult,person);
+  html+=`<div class="search-ahead"><span class="search-ahead-label">Ver otra fecha:</span><input type="date" id="search-date-${person}" value="${searchVal}" min="${addDays(day2,1)}" /><button class="search-ahead-btn" onclick="doSearch('${person}')">Buscar</button></div>`;
+  if(searchResult) {
+    const sr=getTasksForDate(searchResult,person);
     html+=`<div class="search-result"><div class="search-result-header">Resultado: ${displayDate(searchResult)}</div>`;
-    if(srTasks.length===0)html+=`<div class="empty">Sin tareas para ese día.</div>`;
-    else srTasks.forEach(t=>{html+=renderTask(t,searchResult,false,false);});
-    html+=`</div>`;
+    if(sr.length===0) html+='<div class="empty">Sin tareas para ese día.</div>';
+    else sr.forEach(t=>{ html+=renderTask(t,searchResult,false,false); });
+    html+='</div>';
   }
   return html;
 }
 
 function renderHistorial() {
   const archived=tasks.filter(t=>t.archived);
-  if(archived.length===0)return`<div class="empty">El historial está vacío.</div>`;
+  if(archived.length===0) return '<div class="empty">El historial está vacío.</div>';
   const byDate={};
-  archived.forEach(t=>{const d=t.date||'sin fecha';if(!byDate[d])byDate[d]=[];byDate[d].push(t);});
+  archived.forEach(t=>{ const d=t.date||'sin fecha'; if(!byDate[d]) byDate[d]=[]; byDate[d].push(t); });
   let html='';
   Object.keys(byDate).sort().reverse().forEach(d=>{
     html+=`<div class="hist-section"><div class="hist-date">${d!=='sin fecha'?displayDate(d):d}</div>`;
@@ -518,125 +606,35 @@ function renderHistorial() {
       const sl=t.status==='done'?'Finalizada':(t.status==='process'?'En proceso':'Pendiente');
       html+=`<div class="hist-item"><span style="flex:1;color:var(--text2)">${t.name}</span><span style="color:var(--text3);font-size:11px">${t.person}</span><span class="hist-state ${sc}">${sl}</span></div>`;
     });
-    html+=`</div>`;
+    html+='</div>';
   });
   return html;
 }
 
 function render() {
   const content=document.getElementById('content');
-  if(currentTab==='general')content.innerHTML=renderGeneral();
-  else if(PERSONS.includes(currentTab))content.innerHTML=renderPersonal(currentTab);
-  else if(currentTab==='historial')content.innerHTML=renderHistorial();
-  attachEvents();
+  if(currentTab==='general') content.innerHTML=renderGeneral();
+  else if(PERSONS.includes(currentTab)) content.innerHTML=renderPersonal(currentTab);
+  else if(currentTab==='historial') content.innerHTML=renderHistorial();
 }
 
-function moveToToday(taskId) {
-  const task = tasks.find(t => t.id === taskId);
-  if (task) {
-    task.date = todayStr();
-    task.archived = false;
-    save();
-    render();
-  }
-}
+window.changeMonth = function(dir) {
+  if(viewOffset+dir<0) return;
+  viewOffset+=dir;
+  render();
+};
 
-function attachEvents() {
-  document.querySelectorAll('[data-toggle]').forEach(row=>{row.addEventListener('click',e=>toggleExpand(row.dataset.toggle,e));});
-  document.querySelectorAll('[data-toggle-date]').forEach(header=>{
-    header.addEventListener('click',()=>{
-      const group=header.closest('.date-group');
-      if(group) group.classList.toggle('collapsed');
-    });
-  });
-  document.querySelectorAll('[data-state-btn]').forEach(el=>{el.addEventListener('click',e=>cycleState(el.dataset.stateBtn,el.dataset.date,e));});
-  document.querySelectorAll('[data-del]').forEach(btn=>{btn.addEventListener('click',e=>deleteTask(btn.dataset.del,e));});
-  document.querySelectorAll('[data-edit]').forEach(btn=>{
-    btn.addEventListener('click',e=>{
-      e.stopPropagation();
-      editTaskId=btn.dataset.edit;
-      const task=tasks.find(t=>t.id===editTaskId);
-      if(!task)return;
-      document.getElementById('e-name').value=task.name;
-      document.getElementById('e-person').value=task.person;
-      document.getElementById('edit-modal').classList.add('open');
-    });
-  });
-
-
-  document.querySelectorAll('textarea[data-field]').forEach(ta=>{ta.addEventListener('click',e=>e.stopPropagation());ta.addEventListener('input',()=>{if(ta.dataset.field==='note')updateNote(ta.dataset.id,ta.dataset.date,ta.value);else updateComment(ta.dataset.id,ta.dataset.date,ta.value);});});
-  document.querySelectorAll('[data-search]').forEach(btn=>{btn.addEventListener('click',()=>{const p=btn.dataset.search;const inp=document.getElementById(`search-date-${p}`);if(inp&&inp.value){personalSearchDate[p]=inp.value;personalSearchResult[p]=inp.value;render();}});});
-  PERSONS.forEach(p=>{const inp=document.getElementById(`search-date-${p}`);if(inp)inp.addEventListener('change',()=>{personalSearchDate[p]=inp.value;});});
-  const prev=document.getElementById('prev-month');const next=document.getElementById('next-month');
-  if(prev)prev.addEventListener('click',()=>{if(viewOffset>0){viewOffset--;render();}});
-  if(next)next.addEventListener('click',()=>{viewOffset++;render();});
-}
-
-document.getElementById('tabs').addEventListener('click',e=>{
-  const tab=e.target.closest('.tab');if(!tab)return;
+// Tabs
+document.getElementById('tabs').addEventListener('click', e=>{
+  const tab=e.target.closest('.tab'); if(!tab) return;
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  tab.classList.add('active');currentTab=tab.dataset.tab;viewOffset=0;render();
+  tab.classList.add('active');
+  currentTab=tab.dataset.tab;
+  viewOffset=0;
+  render();
 });
 
-document.getElementById('fab').addEventListener('click',()=>{
-  document.getElementById('m-date').value=todayStr();
-  document.getElementById('m-recur-start').value=todayStr();
-  document.getElementById('m-name').value='';
-  document.getElementById('modal').classList.add('open');
-});
-document.getElementById('m-cancel').addEventListener('click',()=>{document.getElementById('modal').classList.remove('open');});
-
-taskType='day';recurType='daily';
-['opt-day','opt-recur'].forEach(id=>{
-  document.getElementById(id).addEventListener('click',()=>{
-    taskType=document.getElementById(id).dataset.type;
-    document.getElementById('opt-day').classList.toggle('selected',taskType==='day');
-    document.getElementById('opt-recur').classList.toggle('selected',taskType==='recur');
-    document.getElementById('day-opts').style.display=taskType==='day'?'block':'none';
-    document.getElementById('recur-opts').classList.toggle('show',taskType==='recur');
-  });
-});
-['rc-daily','rc-weekly','rc-monthly'].forEach(id=>{
-  document.getElementById(id).addEventListener('click',()=>{
-    recurType=document.getElementById(id).dataset.recur;
-    ['rc-daily','rc-weekly','rc-monthly'].forEach(rid=>document.getElementById(rid).classList.remove('selected'));
-    document.getElementById(id).classList.add('selected');
-  });
-});
-
-document.getElementById('m-save').addEventListener('click',()=>{
-  const name=document.getElementById('m-name').value.trim();
-  const person=document.getElementById('m-person').value;
-  if(!name)return;
-  const dateVal=document.getElementById('m-date').value||todayStr();
-  const recurStart=document.getElementById('m-recur-start').value||todayStr();
-  const task={id:generateId(),name,person,recurrent:taskType==='recur',date:taskType==='day'?dateVal:recurStart,recurFrom:taskType==='recur'?recurStart:null,recur:taskType==='recur'?recurType:null,status:'pending',note:'',comment:'',states:taskType==='recur'?{}:null,archived:false};
-  // Remove null fields before saving to Firebase
-  Object.keys(task).forEach(k => { if(task[k]===null) delete task[k]; });
-  tasks.push(task);save();render();
-  document.getElementById('modal').classList.remove('open');
-});
-
-document.getElementById('t-cancel').addEventListener('click',()=>{document.getElementById('transfer-modal').classList.remove('open');transferTaskId=null;});
-document.getElementById('t-confirm').addEventListener('click',()=>{
-  if(!transferTaskId)return;
-  const newDate=document.getElementById('t-date').value;
-  const task=tasks.find(t=>t.id===transferTaskId);
-  if(task&&newDate){task.date=newDate;task.archived=false;save();render();}
-  document.getElementById('transfer-modal').classList.remove('open');transferTaskId=null;
-});
-document.getElementById('e-cancel').addEventListener('click',()=>{document.getElementById('edit-modal').classList.remove('open');editTaskId=null;});
-document.getElementById('e-save').addEventListener('click',()=>{
-  if(!editTaskId)return;
-  const task=tasks.find(t=>t.id===editTaskId);
-  if(task){
-    task.name=document.getElementById('e-name').value.trim()||task.name;
-    task.person=document.getElementById('e-person').value;
-  }
-  save();render();
-  document.getElementById('edit-modal').classList.remove('open');editTaskId=null;
-});
-
+// Today display
 const d=new Date();
 document.getElementById('today-display').textContent=`${DAYS_ES[d.getDay()]} ${d.getDate()} de ${MONTHS_ES[d.getMonth()]}`;
 
