@@ -102,6 +102,11 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); font
 .month-nav-btn:hover { border-color: var(--brand); color: var(--brand); }
 .month-label { font-size: 13px; color: var(--text); font-weight: 500; }
 .empty { font-size: 12px; color: var(--text3); padding: 10px 0; }
+.date-header { cursor: pointer; user-select: none; }
+.date-header:hover .date-label { opacity: 0.8; }
+.date-chevron { font-size: 11px; color: var(--text3); transition: transform 0.2s; margin-left: auto; }
+.date-group.collapsed .date-chevron { transform: rotate(-90deg); }
+.date-group.collapsed .date-tasks { display: none; }
 .search-ahead { display: flex; align-items: center; gap: 10px; margin-top: 8px; padding: 10px 12px; border-radius: var(--radius); border: 0.5px dashed var(--border2); }
 .search-ahead input[type=date] { background: var(--bg3); border: 0.5px solid var(--border2); border-radius: 6px; padding: 5px 8px; font-size: 12px; color: var(--text2); font-family: var(--font); outline: none; }
 .search-ahead input[type=date]:focus { border-color: var(--brand); }
@@ -400,10 +405,13 @@ function renderDateGroupPersonal(dateStr,taskList,isYest,isToday) {
 function renderDateGroupGeneral(dateStr,taskList,isYest,isToday) {
   const labelClass=isToday?'today':(isYest?'yesterday-lbl':'');
   const badge=isToday?`<span class="date-badge">HOY</span>`:(isYest?`<span class="date-badge" style="background:var(--yesterday)">AYER</span>`:'');
-  let html=`<div class="date-group"><div class="date-header"><span class="date-label ${labelClass}">${displayDate(dateStr)}</span>${badge}</div>`;
+  // Collapse by default if not today and not yesterday
+  const collapsed = (!isToday && !isYest) ? 'collapsed' : '';
+  const chevron = (!isToday && !isYest) ? `<span class="date-chevron">&#8964;</span>` : '';
+  let html=`<div class="date-group ${collapsed}" data-dategroup="${dateStr}"><div class="date-header" data-toggle-date="${dateStr}"><span class="date-label ${labelClass}">${displayDate(dateStr)}</span>${badge}${chevron}</div><div class="date-tasks">`;
   if(taskList.length===0)html+=`<div class="empty">Sin tareas.</div>`;
   else taskList.forEach(t=>{html+=renderTask(t,dateStr,isYest,true);});
-  html+=`</div>`;
+  html+=`</div></div>`;
   return html;
 }
 
@@ -478,6 +486,12 @@ function render() {
 
 function attachEvents() {
   document.querySelectorAll('[data-toggle]').forEach(row=>{row.addEventListener('click',e=>toggleExpand(row.dataset.toggle,e));});
+  document.querySelectorAll('[data-toggle-date]').forEach(header=>{
+    header.addEventListener('click',()=>{
+      const group=header.closest('.date-group');
+      if(group) group.classList.toggle('collapsed');
+    });
+  });
   document.querySelectorAll('[data-state-btn]').forEach(el=>{el.addEventListener('click',e=>cycleState(el.dataset.stateBtn,el.dataset.date,e));});
   document.querySelectorAll('[data-del]').forEach(btn=>{btn.addEventListener('click',e=>deleteTask(btn.dataset.del,e));});
   document.querySelectorAll('.transfer-btn').forEach(btn=>{btn.addEventListener('click',e=>{e.stopPropagation();transferTaskId=btn.dataset.id;document.getElementById('t-date').value=todayStr();document.getElementById('transfer-modal').classList.add('open');});});
