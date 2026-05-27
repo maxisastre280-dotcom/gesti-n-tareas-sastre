@@ -372,7 +372,7 @@ function renderTask(task,dateStr,isYest,showPerson) {
   const expClass=isExpanded?'expanded':'';
   const nameClass=status==='done'?'done-text':'';
   const excl=isYest&&status!=='done'?`<span class="task-excl">⚠ </span>`:'';
-  const transferBtn=isYest&&status!=='done'?`<button class="transfer-today-btn" data-today="${task.id}" title="Mover a hoy">→ Hoy</button><button class="transfer-btn" data-id="${task.id}">Otra fecha</button>`:'';
+  const transferBtn=isYest&&status!=='done'?`<button class="transfer-today-btn" onclick="moveToToday('${task.id}');event.stopPropagation();" title="Mover a hoy">→ Mover a hoy</button>`:'';
   const personTag=showPerson?`<span class="task-person">${task.person}</span>`:'';
   const recurTag=task.recurrent?`<span class="task-recur">↻</span>`:'';
   let preview='';
@@ -531,6 +531,16 @@ function render() {
   attachEvents();
 }
 
+function moveToToday(taskId) {
+  const task = tasks.find(t => t.id === taskId);
+  if (task) {
+    task.date = todayStr();
+    task.archived = false;
+    save();
+    render();
+  }
+}
+
 function attachEvents() {
   document.querySelectorAll('[data-toggle]').forEach(row=>{row.addEventListener('click',e=>toggleExpand(row.dataset.toggle,e));});
   document.querySelectorAll('[data-toggle-date]').forEach(header=>{
@@ -552,14 +562,8 @@ function attachEvents() {
       document.getElementById('edit-modal').classList.add('open');
     });
   });
-  document.querySelectorAll('[data-today]').forEach(btn=>{
-    btn.addEventListener('click',e=>{
-      e.stopPropagation();
-      const task=tasks.find(t=>t.id===btn.dataset.today);
-      if(task){task.date=todayStr();task.archived=false;save();render();}
-    });
-  });
-  document.querySelectorAll('.transfer-btn').forEach(btn=>{btn.addEventListener('click',e=>{e.stopPropagation();transferTaskId=btn.dataset.id;document.getElementById('t-date').value=todayStr();document.getElementById('transfer-modal').classList.add('open');});});
+
+
   document.querySelectorAll('textarea[data-field]').forEach(ta=>{ta.addEventListener('click',e=>e.stopPropagation());ta.addEventListener('input',()=>{if(ta.dataset.field==='note')updateNote(ta.dataset.id,ta.dataset.date,ta.value);else updateComment(ta.dataset.id,ta.dataset.date,ta.value);});});
   document.querySelectorAll('[data-search]').forEach(btn=>{btn.addEventListener('click',()=>{const p=btn.dataset.search;const inp=document.getElementById(`search-date-${p}`);if(inp&&inp.value){personalSearchDate[p]=inp.value;personalSearchResult[p]=inp.value;render();}});});
   PERSONS.forEach(p=>{const inp=document.getElementById(`search-date-${p}`);if(inp)inp.addEventListener('change',()=>{personalSearchDate[p]=inp.value;});});
