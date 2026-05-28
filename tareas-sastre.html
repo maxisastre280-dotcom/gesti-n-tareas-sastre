@@ -576,7 +576,7 @@ function renderPersonal(person) {
     const tl=getTasksForDate(dateStr,person);
     const isYest=dateStr===yest, isToday=dateStr===today;
     if(tl.length===0&&!isToday&&!isYest) return;
-    const collapsible=!isToday&&!isYest;
+    const collapsible=!isToday;
     if(collapsible&&!collapsedDates.has(person+'_'+dateStr)) collapsedDates.add(person+'_'+dateStr);
     html+=renderDateGroup(dateStr,tl,isYest,isToday,false,collapsible);
   });
