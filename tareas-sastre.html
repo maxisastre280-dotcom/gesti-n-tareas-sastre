@@ -329,8 +329,8 @@ window.toggleExpand = function(key) {
   render();
 };
 
-window.toggleDate = function(dateStr) {
-  if(collapsedDates.has(dateStr)) collapsedDates.delete(dateStr); else collapsedDates.add(dateStr);
+window.toggleDate = function(key) {
+  if(collapsedDates.has(key)) collapsedDates.delete(key); else collapsedDates.add(key);
   render();
 };
 
@@ -494,15 +494,16 @@ function renderTask(task, dateStr, isYest, showPerson) {
   </div>`;
 }
 
-function renderDateGroup(dateStr, taskList, isYest, isToday, showPerson, collapsible) {
+function renderDateGroup(dateStr, taskList, isYest, isToday, showPerson, collapsible, groupKey) {
+  const key = groupKey || dateStr;
   const labelClass = isToday?'today':(isYest?'yesterday-lbl':'');
   const badge = isToday?`<span class="date-badge">HOY</span>`:(isYest?`<span class="date-badge" style="background:var(--yesterday)">AYER</span>`:'');
   const hasUnfinished = isYest && taskList.some(t=>getState(t,dateStr).status!=='done');
   const exclamation = hasUnfinished ? '<span style="color:#e6a817;font-size:12px;">⚠</span>' : '';
-  const isCollapsed = collapsible && collapsedDates.has(dateStr);
+  const isCollapsed = collapsible && collapsedDates.has(key);
   const collapsedClass = isCollapsed ? 'collapsed' : '';
   const chevron = collapsible ? `<span class="date-chevron">${isCollapsed?'&#8250;':'&#8964;'}</span>` : '';
-  const toggleFn = collapsible ? `onclick="toggleDate('${dateStr}')"` : '';
+  const toggleFn = collapsible ? `onclick="toggleDate('${key}')"` : '';
 
   const pending = taskList.filter(t=>getState(t,dateStr).status==='pending');
   const inProcess = taskList.filter(t=>getState(t,dateStr).status==='process');
@@ -561,7 +562,7 @@ function renderGeneral() {
     hasAny=true;
     const collapsible=!isToday;
     if(collapsible&&!collapsedDates.has(dateStr)) collapsedDates.add(dateStr); // default collapsed
-    html+=renderDateGroup(dateStr,tl,isYest,isToday,true,collapsible);
+    html+=renderDateGroup(dateStr,tl,isYest,isToday,true,collapsible,dateStr);
   });
   if(!hasAny) html+='<div class="empty">No hay tareas en este período.</div>';
   return html;
@@ -577,8 +578,9 @@ function renderPersonal(person) {
     const isYest=dateStr===yest, isToday=dateStr===today;
     if(tl.length===0&&!isToday&&!isYest) return;
     const collapsible=!isToday;
-    if(collapsible&&!collapsedDates.has(person+'_'+dateStr)) collapsedDates.add(person+'_'+dateStr);
-    html+=renderDateGroup(dateStr,tl,isYest,isToday,false,collapsible);
+    const pKey = person+'_'+dateStr;
+    if(collapsible&&!collapsedDates.has(pKey)) collapsedDates.add(pKey);
+    html+=renderDateGroup(dateStr,tl,isYest,isToday,false,collapsible,pKey);
   });
   const searchVal=personalSearchDate[person]||'';
   const searchResult=personalSearchResult[person];
