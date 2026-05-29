@@ -559,7 +559,7 @@ function renderGeneral() {
     const isYest=dateStr===yest, isToday=dateStr===today;
     if(tl.length===0&&!isToday&&!isYest) return;
     hasAny=true;
-    const collapsible=!isToday&&!isYest;
+    const collapsible=!isToday;
     if(collapsible&&!collapsedDates.has(dateStr)) collapsedDates.add(dateStr); // default collapsed
     html+=renderDateGroup(dateStr,tl,isYest,isToday,true,collapsible);
   });
