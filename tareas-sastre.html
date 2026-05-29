@@ -196,6 +196,8 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); font
     <input type="text" id="e-name" placeholder="Nombre de la tarea..." />
     <label>Responsable</label>
     <select id="e-person"><option>Máximo</option><option>Johana</option><option>Milagros</option><option>Coca</option><option>Rocío</option></select>
+    <label>Fecha</label>
+    <input type="date" id="e-date" />
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal('edit-modal')">Cancelar</button>
       <button class="btn-add" onclick="confirmEdit()">Guardar</button>
@@ -241,6 +243,7 @@ let taskType = 'day';
 let recurType = 'daily';
 let expandedKeys = new Set();
 let collapsedDates = new Set();
+let manuallyExpanded = new Set();
 let personalSearchDate = {};
 let personalSearchResult = {};
 let saveTimeout = null;
@@ -330,7 +333,13 @@ window.toggleExpand = function(key) {
 };
 
 window.toggleDate = function(key) {
-  if(collapsedDates.has(key)) collapsedDates.delete(key); else collapsedDates.add(key);
+  if(collapsedDates.has(key)) {
+    collapsedDates.delete(key);
+    manuallyExpanded.add(key);
+  } else {
+    collapsedDates.add(key);
+    manuallyExpanded.delete(key);
+  }
   render();
 };
 
@@ -344,6 +353,7 @@ window.openEditModal = function(taskId) {
   const task = tasks.find(t=>t.id===taskId); if(!task) return;
   document.getElementById('e-name').value = task.name;
   document.getElementById('e-person').value = task.person;
+  document.getElementById('e-date').value = task.date || '';
   document.getElementById('edit-modal').classList.add('open');
 };
 
@@ -352,6 +362,8 @@ window.confirmEdit = function() {
   const name = document.getElementById('e-name').value.trim();
   if(name) task.name = name;
   task.person = document.getElementById('e-person').value;
+  const newDate = document.getElementById('e-date').value;
+  if(newDate) task.date = newDate;
   scheduleSave(); render();
   closeModal('edit-modal'); editTaskId=null;
 };
@@ -561,7 +573,7 @@ function renderGeneral() {
     if(tl.length===0&&!isToday&&!isYest) return;
     hasAny=true;
     const collapsible=!isToday;
-    if(collapsible&&!collapsedDates.has(dateStr)) collapsedDates.add(dateStr); // default collapsed
+    if(collapsible && !collapsedDates.has(dateStr) && !manuallyExpanded.has(dateStr)) collapsedDates.add(dateStr);
     html+=renderDateGroup(dateStr,tl,isYest,isToday,true,collapsible,dateStr);
   });
   if(!hasAny) html+='<div class="empty">No hay tareas en este período.</div>';
@@ -578,9 +590,8 @@ function renderPersonal(person) {
     const isYest=dateStr===yest, isToday=dateStr===today;
     if(tl.length===0&&!isToday&&!isYest) return;
     const collapsible=!isToday;
-    const pKey = person+'_'+dateStr;
-    if(collapsible&&!collapsedDates.has(pKey)) collapsedDates.add(pKey);
-    html+=renderDateGroup(dateStr,tl,isYest,isToday,false,collapsible,pKey);
+    if(collapsible && !collapsedDates.has(dateStr) && !manuallyExpanded.has(dateStr)) collapsedDates.add(dateStr);
+    html+=renderDateGroup(dateStr,tl,isYest,isToday,false,collapsible,dateStr);
   });
   const searchVal=personalSearchDate[person]||'';
   const searchResult=personalSearchResult[person];
@@ -633,6 +644,8 @@ document.getElementById('tabs').addEventListener('click', e=>{
   tab.classList.add('active');
   currentTab=tab.dataset.tab;
   viewOffset=0;
+  collapsedDates.clear();
+  manuallyExpanded.clear();
   render();
 });
 
